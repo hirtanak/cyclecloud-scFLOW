@@ -28,6 +28,8 @@ Autoscale = $Autoscale
         LICENSE = $configuration_LICENSE
         MPI = $configuration_MPI
 
+        SCRIPTUSER = $SCRIPTUSER
+
         slurm.version = $configuration_slurm_version
 
 #        slurm.accounting.enabled = $configuration_slurm_accounting_enabled
@@ -49,7 +51,7 @@ Autoscale = $Autoscale
         cshared.server.legacy_links_disabled = true
 
         [[[cluster-init cyclecloud]]]
-        [[[cluster-init scFlow:default:2.3.0]]]
+        [[[cluster-init scFlow:default:2.4.1]]]
         Optional = true
 
         [[[configuration cyclecloud.mounts.nfs_shared]]]
@@ -82,7 +84,7 @@ Autoscale = $Autoscale
         cyclecloud.mounts.nfs_shared.disabled = ${NFSType != "External"}
 
         [[[cluster-init cyclecloud]]]
-	[[[cluster-init scFlow:scheduler:2.3.0]]]
+	[[[cluster-init scFlow:scheduler:2.4.1]]]
 
 
         [[[network-interface eth0]]]
@@ -94,7 +96,7 @@ Autoscale = $Autoscale
         PublicPort = 8652
 
         [[[volume sched]]]
-        Size = 1024
+        Size = 256
         SSD = True
         Mount = builtinsched
         Persistent = False
@@ -140,7 +142,7 @@ Autoscale = $Autoscale
         slurm.hpc = true
 
         [[[cluster-init cyclecloud]]]
-	[[[cluster-init scFlow:execute:2.3.0]]]
+	[[[cluster-init scFlow:execute:2.4.1]]]
 
         [[[network-interface eth0]]]
         AssociatePublicIpAddress = $ExecuteNodesPublic
@@ -159,7 +161,7 @@ Autoscale = $Autoscale
         slurm.hpc = false
 
         [[[cluster-init cyclecloud]]]
-	[[[cluster-init scFlow:execute:2.3.0]]]
+	[[[cluster-init scFlow:execute:2.4.1]]]
 
         [[[network-interface eth0]]]
         AssociatePublicIpAddress = $ExecuteNodesPublic
@@ -175,6 +177,16 @@ Order = 1
         HideLabel = true
         Config.Plugin = pico.widget.HtmlTemplateWidget
         Config.Template := "Slurm is a highly configurable open source workload manager. See the <a href=\"https://www.schedmd.com/\" target=\"_blank\">Slurm project site</a> for an overview.</p><p>Follow the instructions in the <a href=\"https://github.com/azure/cyclecloud-slurm/\" target=\"_blank\">README</a> for details on instructions on extending and configuring the Project for your environment.</p></td></tr></table>"
+
+    [[parameters Script User]]
+    Required = True
+    Description = "クラスタAdminユーザがAzure CycleCloudのユーザと異なる場合にこのパラメータを利用して設定します。単一の場合にはAzure CycleCloudと同じユーザ名にします。"
+    Order = 12
+
+        [[[parameter SCRIPTUSER]]]
+        Label = Script User Name
+        Description = Script User Name in multi user enviroment
+        defaultvalue = azureuser
 
     [[parameters About scFlow Script]]
     Order = 3
@@ -206,6 +218,9 @@ Order = 1
             [[[[list Config.Entries]]]]
             Name = scFLOW2020
             Label = scFLOW 2020
+            [[[[list Config.Entries]]]]
+            Name = scFLOW2020_sp1
+            Label = scFLOW 2020_sp1
 
         [[[parameter configuration_STREAM_version]]]
         required = True
@@ -219,6 +234,9 @@ Order = 1
             [[[[list Config.Entries]]]]
             Name = st2020
             Label = STREAM 2020
+            [[[[list Config.Entries]]]]
+            Name = st2020_sp1
+            Label = STREAM 2020_sp1
 
         [[[parameter configuration_LICENSE]]]
         requied = False
@@ -251,13 +269,13 @@ Order = 1
         Label = Scheduler VM Type
         Description = The VM type for scheduler node
         ParameterType = Cloud.MachineType
-        DefaultValue = Standard_D12_v2
+        DefaultValue = Standard_D2s_v3
 
         [[[parameter HPCMachineType]]]
         Label = HPC VM Type
         Description = The VM type for HPC execute nodes
         ParameterType = Cloud.MachineType
-        DefaultValue = Standard_HC44rs
+        DefaultValue = Standard_HB120rs_v2
         Config.Multiselect = true
         Config.Filter := Package in {"Standard_H16r", "Standard_H16r_Promo", "Standard_HB60rs", "Standard_HB120rs_v2", "Standard_HC44rs"}
         config.plugin = pico.control.AutoCompleteDropdown
@@ -314,7 +332,7 @@ Order = 1
         [[[parameter MaxHPCExecuteCoreCount]]]
         Label = Max HPC Cores
         Description = The total number of HPC execute cores to start
-        DefaultValue = 88
+        DefaultValue = 240
         Config.Plugin = pico.form.NumberTextBox
         Config.MinValue = 1
         Config.IntegerOnly = true
@@ -413,7 +431,7 @@ Order = 30
         [[[parameter FilesystemSize]]]
         Label = Size (GB)
         Description = The filesystem size
-        DefaultValue = 100
+        DefaultValue = 256
 
         Config.Plugin = pico.form.NumberTextBox
         Config.MinValue = 10
@@ -509,7 +527,7 @@ Order = 40
         [[[parameter configuration_slurm_shutdown_policy]]]
 	Label = ShutdownPolicy
         description = By default, autostop will Delete stopped VMS for lowest cost.  Optionally, Stop/Deallocate the VMs for faster restart instead.
-        DefaultValue = Terminate
+        DefaultValue = Deallocate
         config.plugin = pico.control.AutoCompleteDropdown
             [[[[list Config.Entries]]]]
             Name = Terminate
